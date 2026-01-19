@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 YouTube Downloader</h1>
+            <p class="subtitle">Download videos and playlists with custom quality</p>
+        </header>
+
+        <main>
+            <!-- URL Input Section -->
+            <section class="input-section">
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="urlInput"
+                        placeholder="Paste YouTube URL (video or playlist)..."
+                        autocomplete="off"
+                    >
+                    <button id="fetchInfoBtn" class="btn btn-primary">
+                        Get Info
+                    </button>
+                </div>
+            </section>
+
+            <!-- Video Info Section -->
+            <section id="infoSection" class="info-section hidden">
+                <div class="video-info-card">
+                    <img id="thumbnail" src="" alt="Thumbnail" class="thumbnail">
+                    <div class="video-details">
+                        <h2 id="videoTitle">Video Title</h2>
+                        <p class="meta">
+                            <span id="uploader"></span>
+                            <span id="duration"></span>
+                            <span id="playlistInfo"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="download-options">
+                    <div class="option-group">
+                        <label for="qualitySelect">Quality:</label>
+                        <select id="qualitySelect">
+                            <option value="best">Best Quality</option>
+                        </select>
+                    </div>
+
+                    <button id="downloadBtn" class="btn btn-success">
+                        Start Download
+                    </button>
+                </div>
+            </section>
+
+            <!-- Active Downloads Section -->
+            <section id="activeDownloads" class="downloads-section hidden">
+                <h2>Active Downloads</h2>
+                <div id="activeDownloadsList"></div>
+            </section>
+
+            <!-- Downloaded Files Section -->
+            <section class="downloads-section">
+                <h2>Downloaded Files</h2>
+                <button id="refreshFilesBtn" class="btn btn-secondary">Refresh</button>
+                <div id="filesList" class="files-list">
+                    <p class="empty-message">No downloads yet</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Powered by yt-dlp | Made with FastAPI</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
