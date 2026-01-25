@@ -1,7 +1,7 @@
 import yt_dlp
 import os
 import asyncio
-from typing import Dict, Callable, Optional, List
+from typing import Any, Dict, Callable, Optional, List, cast
 from pathlib import Path
 
 
@@ -13,13 +13,13 @@ class YouTubeDownloader:
 
     def get_video_info(self, url: str) -> dict:
         """Get video or playlist information without downloading"""
-        ydl_opts = {
+        ydl_opts: Dict[str, Any] = {
             'quiet': True,
             'no_warnings': True,
             'extract_flat': False,
         }
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(cast(Any, ydl_opts)) as ydl:
             try:
                 info = ydl.extract_info(url, download=False)
 
@@ -40,8 +40,9 @@ class YouTubeDownloader:
                     formats = []
                     seen_resolutions = set()
 
-                    if 'formats' in info:
-                        for fmt in info['formats']:
+                    formats_info = info.get('formats')
+                    if isinstance(formats_info, list):
+                        for fmt in formats_info:
                             resolution = fmt.get('resolution', 'Unknown')
                             height = fmt.get('height')
 
@@ -73,16 +74,18 @@ class YouTubeDownloader:
 
     def _get_format_string(self, quality: str) -> str:
         """Convert quality string to yt-dlp format string"""
+        # Prefer H.264 (avc1) and AAC (m4a) for compatibility with car screens/older devices
+        # Falls back to standard selection if H.264 is not available
         quality_map = {
-            '2160p': 'bestvideo[height<=2160]+bestaudio/best[height<=2160]',
-            '1440p': 'bestvideo[height<=1440]+bestaudio/best[height<=1440]',
-            '1080p': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
-            '720p': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
-            '480p': 'bestvideo[height<=480]+bestaudio/best[height<=480]',
-            '360p': 'bestvideo[height<=360]+bestaudio/best[height<=360]',
-            'best': 'bestvideo+bestaudio/best',
+            '2160p': 'bestvideo[height<=2160][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=2160]+bestaudio/best[height<=2160]',
+            '1440p': 'bestvideo[height<=1440][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=1440]+bestaudio/best[height<=1440]',
+            '1080p': 'bestvideo[height<=1080][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+            '720p': 'bestvideo[height<=720][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=720]+bestaudio/best[height<=720]',
+            '480p': 'bestvideo[height<=480][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=480]+bestaudio/best[height<=480]',
+            '360p': 'bestvideo[height<=360][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=360]+bestaudio/best[height<=360]',
+            'best': 'bestvideo[vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo+bestaudio/best',
         }
-        return quality_map.get(quality, 'bestvideo+bestaudio/best')
+        return quality_map.get(quality, 'bestvideo[vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo+bestaudio/best')
 
     async def download(
         self,
@@ -129,7 +132,7 @@ class YouTubeDownloader:
                 # Schedule the coroutine in the main event loop from this thread
                 asyncio.run_coroutine_threadsafe(progress_callback(status_update), loop)
 
-        ydl_opts = {
+        ydl_opts: Dict[str, Any] = {
             'format': self._get_format_string(quality),
             'outtmpl': str(self.download_dir / '%(title)s.%(ext)s'),
             'progress_hooks': [progress_hook],
@@ -184,7 +187,7 @@ class YouTubeDownloader:
 
     def _download_sync(self, url: str, ydl_opts: dict):
         """Synchronous download function to run in executor"""
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        with yt_dlp.YoutubeDL(cast(Any, ydl_opts)) as ydl:
             ydl.download([url])
 
     def get_download_status(self, download_id: str) -> Optional[dict]:
