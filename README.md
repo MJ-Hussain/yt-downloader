@@ -34,7 +34,47 @@ brew install ffmpeg
 ```
 
 **Windows:**
-Download from [ffmpeg.org](https://ffmpeg.org/download.html) and add to PATH.
+You need `ffmpeg` available on your `PATH` (required for merging video+audio streams).
+
+#### Option A: Install via winget (recommended)
+1. Open **PowerShell**.
+2. Check winget is available:
+  ```powershell
+  winget --version
+  ```
+3. Install ffmpeg:
+  ```powershell
+  winget install --id Gyan.FFmpeg -e
+  ```
+4. Close the terminal and open a **new** PowerShell (PATH refresh).
+5. Verify:
+  ```powershell
+  ffmpeg -version
+  where.exe ffmpeg
+  ```
+
+#### Option B: Manual install (no package manager)
+1. Download an ffmpeg build (e.g. “release essentials”) from:
+  - https://www.gyan.dev/ffmpeg/builds/
+2. Unzip it to a simple folder, for example:
+  - `C:\ffmpeg\`
+3. Locate the `bin` folder that contains `ffmpeg.exe` (typically `C:\ffmpeg\bin`).
+4. Add it to PATH:
+  - Press **Win + S** → search **Environment Variables**
+  - Open **Edit the system environment variables**
+  - Click **Environment Variables…**
+  - Under **User variables** (or **System variables**), select **Path** → **Edit** → **New**
+  - Add: `C:\ffmpeg\bin`
+  - Click **OK** to close all dialogs
+5. Close all terminals (and if needed VS Code) and open a new PowerShell.
+6. Verify:
+  ```powershell
+  ffmpeg -version
+  where.exe ffmpeg
+  ```
+
+#### Common gotcha
+If you install ffmpeg while the server is already running, the running `uvicorn` process may not see the updated PATH. Stop the server (`Ctrl + C`) and restart `run.bat` after installing ffmpeg.
 
 ## 🚀 Installation
 
@@ -63,9 +103,11 @@ pip install -r requirements.txt
 Edit the `.env` file:
 ```env
 PORT=8000
-HOST=0.0.0.0
+HOST=127.0.0.1
 NGROK_AUTHTOKEN=your_ngrok_token_here  # Optional: for public access
 ```
+
+> Tip: `127.0.0.1` (localhost) is local-only. If you want to access the app from another device on your WiFi/LAN, set `HOST=0.0.0.0`.
 
 ### Getting ngrok Auth Token (Optional)
 
@@ -93,14 +135,18 @@ run.bat
 ```bash
 # Linux/macOS
 source .venv/bin/activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 
 # Windows
 .venv\Scripts\activate
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
+> Want LAN access? Use `--host 0.0.0.0` and open `http://<your-ip>:8000` from other devices.
+
 ### Accessing the Application
+
+> Note: `0.0.0.0` is a **bind address** (listen on all interfaces), not a URL you can open in a browser. If the server prints `0.0.0.0:8000`, open `http://localhost:8000` on the same machine, or `http://<your-ip>:8000` from another device.
 
 After starting the server, you'll see:
 

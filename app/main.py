@@ -170,7 +170,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     PORT = int(os.getenv("PORT", 8000))
-    HOST = os.getenv("HOST", "0.0.0.0")
+    HOST = os.getenv("HOST", "127.0.0.1")
 
     print("\n" + "="*60)
     print("🎬 YouTube Downloader Server Starting...")
@@ -190,16 +190,18 @@ if __name__ == "__main__":
     else:
         print("\n💡 Tip: Add NGROK_AUTHTOKEN to .env for public access")
 
-    # Get local IP
-    import socket
-    hostname = socket.gethostname()
-    try:
-        local_ip = socket.gethostbyname(hostname)
-        print(f"\n📍 Local Network: http://{local_ip}:{PORT}")
-    except:
-        pass
-
-    print(f"📍 Localhost: http://localhost:{PORT}")
+    if HOST in ("127.0.0.1", "localhost"):
+        print(f"📍 Localhost: http://localhost:{PORT}")
+    else:
+        # Get local IP (best-effort) for LAN access.
+        import socket
+        hostname = socket.gethostname()
+        try:
+            local_ip = socket.gethostbyname(hostname)
+            print(f"\n📍 Local Network: http://{local_ip}:{PORT}")
+        except:
+            pass
+        print(f"📍 Bound to: http://{HOST}:{PORT}")
     print("\n" + "="*60 + "\n")
 
     uvicorn.run(app, host=HOST, port=PORT)
